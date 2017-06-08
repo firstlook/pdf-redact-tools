@@ -28,6 +28,14 @@ class PDFRedactTools(object):
             self.pdf_filename = None
             self.pages_dirname = None
 
+        # self.quality = '100'
+        # if quality:
+        #     try:
+        #         int_quality = int(quality)
+        #         self.quality = quality
+        #     except ValueError:
+        #         print('Incorrect quality value given. Default \'100\' used.')
+
     def set_pdf_filename(self, pdf_filename):
         self.pdf_filename = os.path.abspath(pdf_filename)
         self.output_filename = self.pdf_filename.replace('.pdf', '-final.pdf')
@@ -37,7 +45,7 @@ class PDFRedactTools(object):
 
         self.transparent_filename = os.path.join(self.pages_dirname, 'page-transparent.png')
 
-    def explode(self):
+    def explode(self, quality='100'):
         if not self.pdf_filename:
             print 'Error: you must call set_pdf_filename before calling explode'
             return False
@@ -54,7 +62,7 @@ class PDFRedactTools(object):
         subprocess.call([ 'convert',
             '-density', '128',
             self.pdf_filename,
-            '-quality', '100',
+            '-quality', quality,
             '-sharpen', '0x1.0',
             self.transparent_filename])
 
@@ -140,6 +148,10 @@ def parse_arguments():
             metavar='filename', dest='sanitize_filename',
             type=lambda s:require_pdf(s),
             help='Sanitize a PDF')
+    parser.add_argument('-q', '--quality',
+            metavar='quality', dest='png_quality',
+            type=int, default=100,
+            help='Quality for the exploded PNGs')
     args = parser.parse_args()
     return args
 
@@ -156,6 +168,7 @@ def main():
     explode_filename = args.explode_filename
     merge_filename = args.merge_filename
     sanitize_filename = args.sanitize_filename
+    png_quality = str(args.png_quality)
 
     pdfrt = PDFRedactTools()
 
@@ -163,7 +176,7 @@ def main():
     if explode_filename:
         if valid_pdf(explode_filename):
             pdfrt.set_pdf_filename(explode_filename)
-            if pdfrt.explode():
+            if pdfrt.explode(png_quality):
                 print 'All done, now go edit PNGs in {} to redact and then run: pdf-redact-tools -m {}'.format(pdfrt.pages_dirname, pdfrt.pdf_filename)
         else:
             print explode_filename,' does not appear to be a PDF file, will not process'
