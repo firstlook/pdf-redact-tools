@@ -12,7 +12,7 @@ cd pdf-redact-tools
 Install dependencies:
 
 ```sh
-sudo apt-get install imagemagick libimage-exiftool-perl python-stdeb python-all fakeroot build-essential
+sudo apt-get install imagemagick libimage-exiftool-perl python-stdeb python-all dh-python fakeroot build-essential 
 ```
 
 Create a .deb and install it:
